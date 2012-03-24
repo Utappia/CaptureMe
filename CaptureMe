@@ -1,38 +1,73 @@
-#!/bin/bash
+#!/bin/bash -x
 #______________________________________________________________________________________________________
 #Name   : CaptureMe
-#Licence: GPL3 (http://www.gnu.org/licenses/gpl.html), FFmepeg and Zenity have their receptive licence, please see their man page
+#Licence: GPL3 (http://www.gnu.org/licenses/gpl.html), FFmepeg and Zenity have their recspective licence, please see their man page
 #Author : Salih Emin
-#Email  : salihemin (at) osarenat.net 
-#Date   : 14-7-2011
-#Version: 1.0
+#Email  : salihemin (at) about.me 
+#Date   : 23-03-2012 (first release 14-7-2011)
+#Version: 2.2
 #System : Linux with Zenity and FFmpeg packages preinstalled
-#WebSite: http://www.cerebrux.net - http://www.osarena.net/author/salih-emin
+#WebSite: http://screen-captureme.blogspot.com
 #Source Code: Everything below comments is the sourcecode :)
 #Description:
-#This simple script will use FFmpeg to make a video from your screen or a selected window
+#This simple script will use FFmpeg to make a video from your screen or a selected window with or without sound
 #______________________________________________________________________________________________________
+   DIR=~/
+   FORMAT=avi
+   DATE=`date +%F_%T`
+   VideoSaveFile=$DIR/CaptureMe_${DATE}.${FORMAT}
+   test -f $VideoSaveFile && rm $VideoSaveFile
+   #TMP=`mktemp`
 
 #Main CaptureMe app:
-WindowTitle=$"Αποθήκευση του βίντεο στο..."
-cd $HOME
-VideoSavePath=$(zenity --title "$WindowTitle" --file-selection --save --confirm-overwrite)
-        echo "Σύλληψη βίντεο από; (Κάντε κλικ στο παράθυρο ή στην επιφάνεια εργασίας)"
-        echo "_______________________________________________________________________"
-        echo "Το βίντεό σας επιλέξατε να αποθηκευτεί στο :"
-        echo "$VideoSavePath"
-        echo "_______________________________________________________________________"
-        echo "Για να σταματήσετε την λήψη βίντεο, επιλέξτε το τερματικό στο οποίο τρέχει"
-        echo "το CaptureMe και πατήστε το πλήκτρο - Q -"
-        echo "_______________________________________________________________________"
-        
-INFO=$(xwininfo -frame)
+CMWindowTitle=$"CaptureMe"
+CMVersion=$"| v2.2"
 
-WIN_GEOMETRY=$(echo "$INFO"|grep -e "Height:" -e "Width:"|cut -d\: -f2|tr "\n" " "|awk '{print $1 "x" $2}')
-WIN_POSITION=$(echo "$INFO"|grep "upper-left"|head -n 2|cut -d\: -f2|tr "\n" " "|awk '{print $1 "," $2}')
+if [ -f /usr/bin/ffmpeg ]; then
+sound_or_not=$(zenity  --list  \
+                                    --width="400" \
+                                    --height="200" \
+                                    --title="$CMWindowTitle $CMVersion" \
+                                    --text "Choose if the recorded video should Have sound or Not\n" \
+                                    --radiolist  --column "Choise" --column "Screencasting" \
+                                    TRUE "With Sound" \
+                                    FALSE "No Sound" \
+                                   --separator=":")
+	#If user pressed "Cancel":
+	if [ $? -eq 1 ] ; 
+   	then
+        zenity --info \
+                    --title="$CMWindowTitle $CMVersion" \
+                    --text="Screencasting was <b>Canceled</b>"
+        exit 1
+        fi
+#Gathering information about screen:
+   INFO=$(xwininfo -frame)
 
-#Kenrel of CaptureMe
-ffmpeg -f alsa -ac 2 -i hw:0,0 -f x11grab -s $WIN_GEOMETRY -r 30 -i :0.0+$WIN_POSITION -r 30 -vcodec libx264 -vpre lossless_ultrafast -sameq -threads 4 "$VideoSavePath.avi"
+   WIN_GEOMETRY=$(echo "$INFO"|grep -e "Height:" -e "Width:"|cut -d\: -f2|tr "\n" " "|awk '{print $1 "x" $2}')
+   WIN_POSITION=$(echo "$INFO"|grep "upper-left"|head -n 2|cut -d\: -f2|tr "\n" " "|awk '{print $1 "," $2}')
+   echo "$WIN_GEOMETRY -i :0.0+$WIN_POSITION -acodec"
+   echo "$WIN_GEOMETRY"
 
-echo "$WIN_GEOMETRY -i :0.0+$WIN_POSITION -acodec"
-echo "$WIN_GEOMETRY"
+
+#Kernel of CaptureMe
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+([[ $sound_or_not = *Με* ]] && ffmpeg -f alsa -ac 2 -i hw:0,0 -f x11grab -s $WIN_GEOMETRY -r 25 -i :0.0+$WIN_POSITION -acodec pcm_s16le -y -sameq $VideoSaveFile 
+[[ $sound_or_not = *Χωρίς* ]] && ffmpeg -f x11grab -s $WIN_GEOMETRY -r 24 -i :0.0+$WIN_POSITION -sameq -y $VideoSaveFile) & zenity --warning --width="300" --height="30" --title="$CMWindowTitle $CMVersion" --text="Screencasting started... \n\nto stop screencasting \npress <b>OK</b>"
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#Old kill method:
+#kill -9 `ps ux | awk '/ffmpeg/ && !/awk/ {print $2}'`
+pkill ffmpeg
+#
+zenity --info \
+             --title="$CMWindowTitle $CMVersion" \
+             --height="30" \
+             --text="Your recording has been saved \nin your home folder<b> $DIR</b>"
+else
+	zenity --title="$CMWindowTitle $CMVersion" \
+	             --error \
+	             --text "The <b>FFmpeg</b> library was not found in your system! \nPlease install it from your distributions Software Center and then try again."
+fi
+
+#The following code creates commpressed audio at a lower quality from the above and smaller sized video
+#ffmpeg -f alsa -ac 2 -i hw:0,0 -f x11grab -s $WIN_GEOMETRY -r 15 -i :0.0+$WIN_POSITION -r 15 -vcodec libx264 -vpre lossless_ultrafast -sameq -threads 4 "$VideoSavePath.avi"

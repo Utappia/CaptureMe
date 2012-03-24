@@ -1,1 +1,27 @@
+----------------------------
+CaptureMe version-2.2
+----------------------------
+	-- refreshed some parts of the code
+	-- translated to english
+
+----------------------------
+CaptureMe version-2.1
+----------------------------
+	--Fixed major BUG causing video output to not properly have timeline when imported in videoediting suites e.g. Openshot, Kdenlive etc.
+
+----------------------------
+CaptureMe version-2.0
+----------------------------
+	-- Video capturing with Sound or No Sound
+	-- Added canceling video recording on window (not in terminal :) )
+
+----------------------------
+CaptureMe version-1.1
+----------------------------
+	-- New recording Kernel with optimum video quality and best posible sound recording
+	-- Added dependency check for FFmpeg in the system of the user
+
+----------------------------
 CaptureMe version-1.0
+----------------------------
+ 	-- initial release stable
