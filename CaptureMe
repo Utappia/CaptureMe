@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash -vx
 #______________________________________________________________________________________________________
 #Name   : CaptureMe
 #Licence: GPL3 (http://www.gnu.org/licenses/gpl.html), FFmepeg and Zenity have their recspective licence, please see their man page
@@ -41,7 +41,7 @@ sound_or_not=$(zenity  --list  \
                     --text="Screencasting was <b>Canceled</b>"
         exit 1
         fi
-#Gathering information about screen:
+
    INFO=$(xwininfo -frame)
 
    WIN_GEOMETRY=$(echo "$INFO"|grep -e "Height:" -e "Width:"|cut -d\: -f2|tr "\n" " "|awk '{print $1 "x" $2}')
@@ -49,16 +49,12 @@ sound_or_not=$(zenity  --list  \
    echo "$WIN_GEOMETRY -i :0.0+$WIN_POSITION -acodec"
    echo "$WIN_GEOMETRY"
 
+   #Kernel of CaptureMe
+([[ $sound_or_not = *With* ]] && ffmpeg -f alsa -ac 2 -i hw:0,0 -f x11grab -s $WIN_GEOMETRY -r 25 -i :0.0+$WIN_POSITION -acodec pcm_s16le -y -sameq $VideoSaveFile 
+[[ $sound_or_not = *No* ]] && ffmpeg -f x11grab -s $WIN_GEOMETRY -r 24 -i :0.0+$WIN_POSITION -sameq -y $VideoSaveFile) & zenity --warning --width="300" --height="30" --title="$CMWindowTitle $CMVersion" --text="Screencasting started... \n\nto stop screencasting \npress <b>OK</b>"
 
-#Kernel of CaptureMe
-#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-([[ $sound_or_not = *Με* ]] && ffmpeg -f alsa -ac 2 -i hw:0,0 -f x11grab -s $WIN_GEOMETRY -r 25 -i :0.0+$WIN_POSITION -acodec pcm_s16le -y -sameq $VideoSaveFile 
-[[ $sound_or_not = *Χωρίς* ]] && ffmpeg -f x11grab -s $WIN_GEOMETRY -r 24 -i :0.0+$WIN_POSITION -sameq -y $VideoSaveFile) & zenity --warning --width="300" --height="30" --title="$CMWindowTitle $CMVersion" --text="Screencasting started... \n\nto stop screencasting \npress <b>OK</b>"
-#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-#Old kill method:
 #kill -9 `ps ux | awk '/ffmpeg/ && !/awk/ {print $2}'`
 pkill ffmpeg
-#
 zenity --info \
              --title="$CMWindowTitle $CMVersion" \
              --height="30" \
