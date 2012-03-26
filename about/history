@@ -1,4 +1,9 @@
 ----------------------------
+CaptureMe version-2.3
+----------------------------
+	-- Fixed BUG: Not recording due to translation typo
+
+----------------------------
 CaptureMe version-2.2
 ----------------------------
 	-- refreshed some parts of the code
