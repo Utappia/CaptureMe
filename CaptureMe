@@ -5,14 +5,14 @@
 #Author : Salih Emin
 #Email  : salihemin (at) about.me 
 #Date   : 26-03-2012 (first release 14-7-2011)
-#Version: 2.3
+#Version: 2.4
 #System : Linux with Zenity and FFmpeg packages preinstalled
 #WebSite: http://screen-captureme.blogspot.com
 #Source Code: Everything below comments is the sourcecode :)
 #Description:
 #This simple script will use FFmpeg to make a video from your screen or a selected window with or without sound
 #______________________________________________________________________________________________________
-   DIR=~/
+   DIR=$HOME
    FORMAT=avi
    DATE=`date +%F_%T`
    VideoSaveFile=$DIR/CaptureMe_${DATE}.${FORMAT}
@@ -21,7 +21,7 @@
 
 #Main CaptureMe app:
 CMWindowTitle=$"CaptureMe"
-CMVersion=$"| v2.3"
+CMVersion=$"| v2.4"
 
 if [ -f /usr/bin/ffmpeg ]; then
 sound_or_not=$(zenity  --list  \
