@@ -1,11 +1,11 @@
-#!/bin/bash -vx
+#!/usr/bin/env bash
 #______________________________________________________________________________________________________
 #Name   : CaptureMe
 #Licence: GPL3 (http://www.gnu.org/licenses/gpl.html), FFmepeg and Zenity have their recspective licence, please see their man page
 #Author : Salih Emin
 #Email  : salihemin (at) about.me 
-#Date   : 26-03-2012 (first release 14-7-2011)
-#Version: 2.4
+#Date   : 11-10-2015 (first release 14-7-2011)
+#Version: 3.0
 #System : Linux with Zenity and FFmpeg packages preinstalled
 #WebSite: http://screen-captureme.blogspot.com
 #Source Code: Everything below comments is the sourcecode :)
@@ -21,7 +21,7 @@
 
 #Main CaptureMe app:
 CMWindowTitle=$"CaptureMe"
-CMVersion=$"| v2.4"
+CMVersion=$"| v3.0"
 
 if [ -f /usr/bin/ffmpeg ]; then
 sound_or_not=$(zenity  --list  \
@@ -50,8 +50,8 @@ sound_or_not=$(zenity  --list  \
    echo "$WIN_GEOMETRY"
 
    #Kernel of CaptureMe
-([[ $sound_or_not = *With* ]] && ffmpeg -f alsa -ac 2 -i hw:0,0 -f x11grab -s $WIN_GEOMETRY -r 25 -i :0.0+$WIN_POSITION -acodec pcm_s16le -y -sameq $VideoSaveFile 
-[[ $sound_or_not = *No* ]] && ffmpeg -f x11grab -s $WIN_GEOMETRY -r 24 -i :0.0+$WIN_POSITION -sameq -y $VideoSaveFile) & zenity --warning --width="300" --height="30" --title="$CMWindowTitle $CMVersion" --text="Screencasting started... \n\nto stop screencasting \npress <b>OK</b>"
+([[ $sound_or_not = *With* ]] && ffmpeg -f alsa -ac 2 -i hw:0,0 -f x11grab -s $WIN_GEOMETRY -r 25 -i :0.0+$WIN_POSITION -acodec pcm_s16le -y -qscale 0 $VideoSaveFile 
+[[ $sound_or_not = *No* ]] && ffmpeg -f x11grab -s $WIN_GEOMETRY -r 24 -i :0.0+$WIN_POSITION -qscale 0 -y $VideoSaveFile) & zenity --warning --width="300" --height="30" --title="$CMWindowTitle $CMVersion" --text="Screencasting started... \n\nto stop screencasting \npress <b>OK</b>"
 
 #kill -9 `ps ux | awk '/ffmpeg/ && !/awk/ {print $2}'`
 pkill ffmpeg
